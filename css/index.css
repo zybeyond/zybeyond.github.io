@@ -3580,6 +3580,8 @@ img {
   margin: 0 auto;
   padding: 2rem 15px;
   max-width: 1000px;
+  -webkit-box-shadow: 0 0 5px rgba(202,203,203,0.5);
+  -moz-box-shadow: 0 0 5px rgba(202,203,204,0.5);
 }
 .layout_post img {
   display: block;
