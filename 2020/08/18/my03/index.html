@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>触控手势之二指缩放优化设计 | 子尧的黄金屋</title><meta name="description" content="简介：本项目是围绕触控屏幕上的二指缩放手势进行的，项目背景是调查了解到老年用户执行这个手势普遍存在下面两类困难。因此，本项目主要针对手势的灵敏程度进行相关参数的优化，为老年用户设计。        （Ⅰ）由于手指关节灵活度下降或皮肤干燥，出现“缩放不听使唤”、“划不动”，表现为灵敏度过低       （Ⅱ）缩放较复杂的界面时（如地图、集体照），迷失于缩放后的图片中，表现为灵敏度过高"><meta name="keywords" content="交互设计,触控手势"><meta name="author" content="zy"><meta name="copyright" content="zy"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/logo-01.png"><link rel="canonical" href="http://zyzhou.work/2020/08/18/my03/"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin="crossorigin"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="触控手势之二指缩放优化设计"><meta property="og:url" content="http://zyzhou.work/2020/08/18/my03/"><meta property="og:site_name" content="子尧的黄金屋"><meta property="og:description" content="简介：本项目是围绕触控屏幕上的二指缩放手势进行的，项目背景是调查了解到老年用户执行这个手势普遍存在下面两类困难。因此，本项目主要针对手势的灵敏程度进行相关参数的优化，为老年用户设计。        （Ⅰ）由于手指关节灵活度下降或皮肤干燥，出现“缩放不听使唤”、“划不动”，表现为灵敏度过低       （Ⅱ）缩放较复杂的界面时（如地图、集体照），迷失于缩放后的图片中，表现为灵敏度过高"><meta property="og:image" content="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/cover_gesture.jpg"><meta property="article:published_time" content="2020-08-18T03:08:45.000Z"><meta property="article:modified_time" content="2021-03-12T03:17:40.145Z"><meta name="twitter:card" content="summary"><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#000')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fff')
+  }
+}
+
+var getCookies = function (name) {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop().split(';').shift()
+}
+
+var autoChangeMode = 'false'
+var t = getCookies('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (Cookies.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.0.2',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: false,
+  copyright: {"limitCount":50,"languages":{"author":"作者: zy","link":"链接: ","source":"来源: 子尧的黄金屋","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false    
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2021-03-12 11:17:40'
+}</script><noscript><style>
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><meta name="generator" content="Hexo 5.0.2"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/myfig.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">3</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">4</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/cover_gesture.jpg)"><nav id="nav"><span class="pull-left" id="blog_name"><a class="blog_title" id="site-name" href="/">子尧的黄金屋</a></span><span class="pull-right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">触控手势之二指缩放优化设计</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-08-18T03:08:45.000Z" title="发表于 2020-08-18 11:08:45">2020-08-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-03-12T03:17:40.145Z" title="更新于 2021-03-12 11:17:40">2021-03-12</time></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h2 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h2><p>本项目是围绕触控屏幕上的二指缩放手势进行的，项目背景是调查了解到老年用户执行这个手势普遍存在下面两类困难。因此，本项目主要针对手势的<strong>灵敏程度</strong>进行相关参数的优化，为老年用户设计。</p>
+<table frame=void><tr>
+      <td align = center><img src= "https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/loading.gif" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/7CD464AC60360FC708693BAA1D63CD94.png"  style="zoom:32%;" align=center border=0 /><font size=2>（Ⅰ）由于手指关节灵活度下降或皮肤干燥，出现“缩放不听使唤”、“划不动”，表现为灵敏度过低</font></td>
+      <td align = center><img src= "https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/loading.gif" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/051AC635FBDADF3BCD66D0FCADD4D91C.png" style="zoom:41%;" align=center border=0 /><font size=2>（Ⅱ）缩放较复杂的界面时（如地图、集体照），迷失于缩放后的图片中，表现为灵敏度过高</font></td>
+      </tr></table>
+<br></br>
+
+<h2 id="两个缩放灵敏度参数："><a href="#两个缩放灵敏度参数：" class="headerlink" title="两个缩放灵敏度参数："></a>两个缩放灵敏度参数：</h2><ul>
+<li><h3 id="控制显示增益"><a href="#控制显示增益" class="headerlink" title="控制显示增益"></a>控制显示增益</h3><p>控制显示增益(Control/Display Ratio)描述输入设备运动与输出设备运动之间映射关系，是交互界面的重要设计参数。它最初被用于描述鼠标移动与显示屏上游标运动的映射关系。<strong>说得通俗和极端一些，</strong>当增益很大（假设是10），就意味着两手指在屏幕上的距离每增加1倍，界面就可以同步缩放10倍，表现为<u>界面能灵敏地捕捉到手指细微的动作，很灵敏</u>；反之，表现为<u>界面的缩放很难被手指带动，很迟钝。</u></p>
+</li>
+<li><h3 id="触发缩放指距"><a href="#触发缩放指距" class="headerlink" title="触发缩放指距"></a>触发缩放指距</h3><p>触发缩放指距最初是为防止误触而设置的安全阈值，在二指缩放中，食指与拇指的初始距离需大于某一特定值，才能触发缩放操作。根据其特性，设置适当的触发缩放指距，有助于稳定触控灵敏度。因此本项目创新性将其与控制显示增益搭配，共同影响缩放灵敏度。</p>
+<p>下面两张动图演示了触发指距=0（左）和触发指距≠0（右）下的缩放情景：</p>
+<table><tr>
+    <td><img src= "https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/loading.gif" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/trigg-0.gif"  style="zoom:67%;" align=center border=0 /></td>
+    <td><img src= "https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/loading.gif" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/trigg-1.gif" style="zoom:34%;" align=center border=0 /></td>
+    </tr></table>
+
+<p>可以看到，左图中手指的滑动立刻带动了图片缩放，而右图中手指需滑动一段距离才能触发图片的缩放。</p>
+<p><br></br></p>
+<h2 id="技术实现："><a href="#技术实现：" class="headerlink" title="技术实现："></a>技术实现：</h2><p>由于目前市面上触控设备的缩放增益均为1，且触发指距尚无统一标准，我选择了安卓开发工具Android Studio来进行全新的缩放灵敏度可调节的平台开发。这里不讨论实现细节，完整代码见<a target="_blank" rel="noopener" href="https://github.com/AcatAdog0/android_zoom_0315">https://github.com/AcatAdog0/android_zoom_0315</a></p>
+</li>
+</ul>
+<table frame=void><tr>
+      <td align = center><img src= "https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/loading.gif" data-lazy-src=" https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/图片1.png "  style="zoom:67%;" align=center border=0 /></td>
+      <td align = center><img src= "https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/loading.gif" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/image-20200907211014057.png" style="zoom:90%;" align=center border=0 /></td>
+      </tr></table>
+
+
+
+<p><br></br></p>
+<h2 id="实验与结果："><a href="#实验与结果：" class="headerlink" title="实验与结果："></a>实验与结果：</h2><p>  本项目采用实验室实验法研究，根据实验假设设计实验。召集了30名65岁以上的老年人作为被试，执行了不同缩放灵敏度下的一系列缩放任务。实验结果的衡量指标包括缩放任务成功率、任务完成时间以及缩放习惯。</p>
+  <table><tr>
+      <td><img src= "https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/loading.gif" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/pa-.jpg"  style="zoom:35%;" align=center border=0 /></td>
+      <td><img src= "https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/loading.gif" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/pa.jpg" style="zoom:40%;" align=center border=0 /></td>
+      </tr></table>
+
+  <center><font size=2>实验现场</font></center>
+
+
+<p>实验结果显示，在控制显示增益值CD&gt;1的基础上，再设置触发缩放二指距离为200dp作为缓冲，可以进一步提高老年用户的任务完成效益，且比目前市场上绝大多数智能手机的配置缩放效果更好。</p>
+<p>因此，从缩放灵敏度的角度出发，适当提高控制显示增益值可以改善老年用户手指皮肤干燥、指关节不灵活造成的第Ⅰ类操作困难；在此基础上设置稍大于初始指距的触发缩放二指距离提供操作缓冲保护，可以缓解缩放过程不受控制的第Ⅱ类困难。两者相辅相成，是为老年人缩放手势设计灵敏度参数的优化配置。</p>
+<p>  ​                                                                             </p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">zy</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://zyzhou.work/2020/08/18/my03/">http://zyzhou.work/2020/08/18/my03/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://zyzhou.work" target="_blank">子尧的黄金屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E4%BA%A4%E4%BA%92%E8%AE%BE%E8%AE%A1/">交互设计</a><a class="post-meta__tags" href="/tags/%E8%A7%A6%E6%8E%A7%E6%89%8B%E5%8A%BF/">触控手势</a></div><div class="post_share"></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2021/03/12/my06/"><img class="prev-cover" data-lazy-src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/matt-le-112706-unsplash.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">颠覆“小屏幕-大信息”场景下传统拖曳手势</div></div></a></div></nav></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By zy</div><div class="icp"><a><img class="icp-icon" src="https://lyzzy-pics-1259325037.cos.ap-chengdu.myqcloud.com/zy/logo-mini.png"/><span>记录子尧的研究生生活</span></a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font_plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font_minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module" defer></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js" async></script><div class="js-pjax"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></div></body></html>
